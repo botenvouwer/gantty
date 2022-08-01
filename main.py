@@ -1,35 +1,85 @@
+import datetime
+from math import floor
 from pathlib import Path
+import calendar
 
 from openpyxl import Workbook
-from openpyxl.styles import Font
+from openpyxl.styles import Font, Border, Side
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
 
 name = "gantt"
 path = Path.home() / (name + '.xlsx')
+# path = 'custom/path'
 
 italic = Font(italic=True)
 bold = Font(bold=True)
 
+border = Border(bottom=Side(style='thin'))
+
 wb = Workbook()
-ws1 = wb.active
-ws1.title = name
+worksheet: Worksheet = wb.active
+worksheet.title = name
 
-ws1_headers1 = ('', '', 'sdsd', '', '', '', '', '', 'dfdfdfdf', '', '')
-ws1_headers2 = ('', 'provincie', 'aansluitingen', 'opwek ans', 'vermogen', 'diff', 'diff', 'diff', 'aansluitingen', 'opwek ans', 'vermogen')
-ws1.append(ws1_headers1)
-ws1.append(ws1_headers2)
+worksheet.column_dimensions['A'].width = 1.2
+worksheet.column_dimensions['B'].width = 43
+worksheet.column_dimensions['C'].width = 9
 
-ws1.column_dimensions['B'].width = 18
-for l in ('C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'):
-    ws1.column_dimensions[l].width = 13
+max_columns_in_excel = 16384
+for i in range(1, 16384):
+    if i >= 4:
+        worksheet.column_dimensions[get_column_letter(i)].width = 2.8
 
-ws1['B1'].font = italic
-ws1['I1'].font = italic
+    worksheet.row_dimensions[i].height = 15
+    worksheet.cell(row=6, column=i).border = border
 
-for c in ws1['A2:K2'][0]:
-    c.font = bold
+worksheet.cell(row=6, column=2).value = 'Actie'
 
-for i in ['', '', '']:
-    ws1.append(i)
+day_names = ('ma', 'di', 'wo', 'do', 'vr', 'za', 'zo')
+month_names = ('Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'Sebtember', 'Oktober', 'November', 'December')
+c = calendar.Calendar()
+
+start_year = 2022
+start_month = 8
+months_duration = 12
+
+end_year = start_year + floor((months_duration - start_month) / 12) + 1
+end_month = (months_duration - (12 - start_month)) % 12 - 1
+
+ym_start = 12 * start_year + start_month - 1
+ym_end = 12 * end_year + end_month
+i = 0
+ii = 0
+matrix_start = 3
+week_start_index = 4
+week_start_end_index = 10
+for ym in range(ym_start, ym_end):
+    y, m = divmod(ym, 12)
+    year = y
+    month = m + 1
+    i += 1
+
+    for day_number in c.itermonthdays(year, month):
+        if day_number == 0:
+            continue
+
+        ii += 1
+        day = calendar.weekday(year, month, day_number)
+        week_number = datetime.date(year, month, day_number).isocalendar().week
+
+        worksheet.cell(row=2, column=ii + matrix_start).value = year
+        worksheet.cell(row=3, column=ii + matrix_start).value = month
+
+        worksheet.cell(row=4, column=ii + matrix_start).value = week_number
+
+        if ii % 7 == 0 or ii == 1:
+            worksheet.merge_cells(start_row=4, start_column=week_start_index, end_row=4, end_column=week_start_end_index)
+            week_start_index = week_start_index + 7
+            week_start_end_index = week_start_end_index + 7
+
+        worksheet.cell(row=5, column=ii + matrix_start).value = day_names[day]
+        worksheet.cell(row=6, column=ii + matrix_start).value = day_number
+
+        # print(i, year, month, month_names[month - 1], day_number, week_number, day, day_names[day])
 
 wb.save(filename=path)
