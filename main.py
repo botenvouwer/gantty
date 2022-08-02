@@ -4,7 +4,7 @@ from pathlib import Path
 import calendar
 
 from openpyxl import Workbook
-from openpyxl.styles import Font, Border, Side
+from openpyxl.styles import Font, Border, Side, Alignment
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -14,6 +14,7 @@ path = Path.home() / (name + '.xlsx')
 
 italic = Font(italic=True)
 bold = Font(bold=True)
+left_align = Alignment(horizontal='left')
 
 border = Border(bottom=Side(style='thin'))
 
@@ -70,9 +71,9 @@ for ym in range(ym_start, ym_end):
         worksheet.cell(row=2, column=ii + matrix_start).value = year
         worksheet.cell(row=3, column=ii + matrix_start).value = month
 
-        worksheet.cell(row=4, column=ii + matrix_start).value = week_number
-
         if ii % 7 == 0 or ii == 1:
+            worksheet.cell(row=4, column=week_start_index).value = week_number if ii == 1 else week_number + 1
+            worksheet.cell(row=4, column=week_start_index).alignment = left_align
             worksheet.merge_cells(start_row=4, start_column=week_start_index, end_row=4, end_column=week_start_end_index)
             week_start_index = week_start_index + 7
             week_start_end_index = week_start_end_index + 7
@@ -82,4 +83,5 @@ for ym in range(ym_start, ym_end):
 
         # print(i, year, month, month_names[month - 1], day_number, week_number, day, day_names[day])
 
+print(path)
 wb.save(filename=path)
