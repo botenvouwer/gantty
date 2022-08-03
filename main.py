@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from openpyxl import Workbook, formatting
-from openpyxl.formatting.rule import CellIsRule, FormulaRule
-from openpyxl.styles import Font, Border, Side, Alignment, NamedStyle, Fill, PatternFill
-from openpyxl.styles.fills import FILL_PATTERN_DARKHORIZONTAL
+from openpyxl import Workbook
+from openpyxl.formatting.rule import FormulaRule
+from openpyxl.styles import Font, Border, Side, Alignment, NamedStyle, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -35,8 +34,10 @@ small = Font(size=9)
 matrix_fill = PatternFill(patternType='solid', bgColor=red)
 left_align = Alignment(horizontal='left')
 center_align = Alignment(horizontal='center', vertical='center')
+middle_align = Alignment(horizontal='center')
 border = Border(bottom=Side(style='thin'))
 matrix_border = Border(bottom=Side(style='thin', color=matrix_color), top=Side(style='thin', color=matrix_color), left=Side(style='thin', color=matrix_color), right=Side(style='thin', color=matrix_color))
+date_format = 'D-M-YYYY'
 
 styles = {}
 
@@ -135,15 +136,20 @@ worksheet.column_dimensions['C'].width = 9
 
 # Take into consideration that the max cols in Excel are 16384
 max_columns_in_excel = matrix_h_end + matrix_h_start + 1
-for i in range(1, max_columns_in_excel):
-    if i >= 4:
-        worksheet.column_dimensions[get_column_letter(i)].width = 2.8
-    worksheet.cell(row=6, column=i).border = border
+for i in range(matrix_h_start + 1, max_columns_in_excel):
+    worksheet.column_dimensions[get_column_letter(i)].width = 2.8
 
 # Prepare 200 rows to use as task -> this should be more than enough
 worksheet.row_dimensions[1].height = 3
 for i in range(2, matrix_v_end + 1):
     worksheet.row_dimensions[i].height = 15
+
+worksheet.cell(row=2, column=2).value = 'Vandaag'
+worksheet.cell(row=2, column=2).font = bold
+worksheet.cell(row=2, column=2).alignment = middle_align
+worksheet.cell(row=3, column=2).value = '=TODAY()'
+worksheet.cell(row=3, column=2).number_format = date_format
+worksheet.cell(row=3, column=2).alignment = middle_align
 
 worksheet.cell(row=6, column=2).value = 'Actie'
 worksheet.cell(row=6, column=2).font = bold
@@ -155,6 +161,12 @@ for i in range(matrix_v_start, matrix_v_end + 1):
     worksheet.cell(row=i, column=3).value = f
 
 worksheet.conditional_formatting.add(f'$D${matrix_v_start}:$ZZ${matrix_v_end}', FormulaRule(formula=[f'D{matrix_v_start}<>""'], stopIfTrue=False, fill=matrix_fill, font=matrix_font))
+
+# Highlight today
+border_highlight_top = Border(left=Side(style='thin', color=red), right=Side(style='thin', color=red), top=Side(style='thin', color=red))
+border_highlight = Border(left=Side(style='thin', color=red), right=Side(style='thin', color=red))
+worksheet.conditional_formatting.add(f'$D$5:$ZZ$5', FormulaRule(formula=[f'TEXT($B$3,"0")=TEXT(D$1,"0")'], stopIfTrue=False, border=border_highlight_top))
+worksheet.conditional_formatting.add(f'$D$6:$ZZ$200', FormulaRule(formula=[f'TEXT($B$3,"0")=TEXT(D$1,"0")'], stopIfTrue=False, border=border_highlight))
 
 days_in_week = mode.value
 sum_days_in_year = 1
@@ -205,9 +217,19 @@ for passed_months, year, days_left_in_year, month, month_name, days_in_month, i,
     worksheet.cell(row=row, column=column_i).value = day_number
     worksheet.cell(row=row, column=column_i).style = month_day_style
 
+    # Metadata -> used to highlight which day it is today
+    worksheet.cell(row=1, column=column_i).value = f'{day_number}-{month}-{year}'
+    worksheet.cell(row=1, column=column_i).number_format = date_format
+
     # matrix row styling
     for row_i in range(matrix_v_start, matrix_v_end + 1):
         worksheet.cell(row=row_i, column=column_i).style = matrix_cell_even if week_is_even else matrix_cell_odd
+
+for i in range(1, max_columns_in_excel):
+    worksheet.cell(row=6, column=i).border = border
+
+c = worksheet['A7']
+worksheet.freeze_panes = c
 
 print(path)
 wb.save(filename=path)
