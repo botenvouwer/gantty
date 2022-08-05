@@ -1,6 +1,7 @@
 import calendar
 import datetime
 from enum import Enum
+from itertools import islice
 from math import floor
 
 
@@ -85,7 +86,7 @@ class TimeIterator:
                 week_number = datetime.date(year, month, day_number).isocalendar().week
 
                 if self.mode == TimeIteratorMode.WEEKS:
-                    _last_week_of_year = datetime.date(year, 12, 31).isocalendar().week
+                    # _last_week_of_year = datetime.date(year, 12, 31).isocalendar().week
 
                     if ii % 7 == 1:
                         i += 1
@@ -104,6 +105,19 @@ class TimeIterator:
 
                     yield passed_months, year, days_left_in_year, month, month_name, days_in_month, i, week_number, day_number, day, day_name
 
+    def get_weeks_in_month(self, year, month):
+
+        i = 0
+        iter_t = self.calendar.itermonthdays(year, month)
+        for day_number in iter_t:
+            if day_number == 0:
+                next(islice(iter_t, 5, 6), None)
+
+            if day_number % 7 == 1:
+                i += 1
+
+        return i
+
     def __len__(self):
         return sum(1 for _ in self.iterate_full())
 
@@ -113,5 +127,3 @@ class TimeIterator:
     def __str__(self):
         s = f"TimeIterator for {self.start_year}-{self.start_month} until {self.end_year}-{self.end_month} taking {self.months_duration} months in {self.mode.name} mode"
         return s
-
-
