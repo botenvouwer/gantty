@@ -113,5 +113,3 @@ class TimeIterator:
     def __str__(self):
         s = f"TimeIterator for {self.start_year}-{self.start_month} until {self.end_year}-{self.end_month} taking {self.months_duration} months in {self.mode.name} mode"
         return s
-
-
