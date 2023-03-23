@@ -23,8 +23,17 @@ class TimeIterator:
         self.start_month = start_month
         self.months_duration = months_duration
         self.mode = mode
-        self.end_year = start_year + floor((months_duration - start_month) / 12) + 1
-        self.end_month = (months_duration - (12 - start_month)) % 12 - 1
+        self.end_year, self.end_month = self.calculate_end_year_and_month(start_year, start_month, months_duration)
+
+    @staticmethod
+    def calculate_end_year_and_month(start_year, start_month, months_duration) -> (int, int):
+        months = start_month - 1 + months_duration
+        year = start_year + months // 12
+        month = months % 12
+        year = year if month > 0 else year - 1
+        month = month if month > 0 else 12
+
+        return year, month
 
     @staticmethod
     def get_month_name(month):

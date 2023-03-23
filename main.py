@@ -8,19 +8,20 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from time_iterate import TimeIteratorMode, TimeIterator
 
-name = "gantt"
-path = Path.home() / (name + '.xlsx')
-# path = 'custom/path'
+start_year = 2023
+start_month = 1
+months_duration = 48
+# mode = TimeIteratorMode.DAYS_NO_WEEKEND
+mode = TimeIteratorMode.DAYS
 
-start_year = 2022
-start_month = 8
-months_duration = 13
-mode = TimeIteratorMode.DAYS_NO_WEEKEND
-# mode = TimeIteratorMode.DAYS
+name = f"gantt_{mode.name.lower()}_template"
+path = Path.home() / 'Documents' / (name + '.xlsx')
+# path = 'custom/path'
 
 timeIterate = TimeIterator(start_year, start_month, months_duration, mode)
 
 matrix_h_start = 3
+matrix_h_start_letter = get_column_letter(matrix_h_start + 1)
 matrix_v_start = 7
 matrix_h_end = len(timeIterate)
 matrix_v_end = 200
@@ -198,9 +199,13 @@ for passed_months, year, days_left_in_year, month, month_name, days_in_month, i,
     week_is_even = week_number % 2 == 0
 
     # Week number
-    if i % days_in_week == 1:
+    if i == 1 or day == 0:
         row = 4
+
         end_column_i = column_i + days_in_week - 1
+
+        if i == 1:
+            end_column_i = column_i + days_in_week - day - 1
 
         worksheet.cell(row=row, column=column_i).value = week_number
         worksheet.cell(row=row, column=column_i).style = week_even if week_is_even else week_odd
@@ -228,8 +233,11 @@ for passed_months, year, days_left_in_year, month, month_name, days_in_month, i,
 for i in range(1, max_columns_in_excel):
     worksheet.cell(row=6, column=i).border = border
 
-c = worksheet['A7']
+# GET START LETTER
+
+
+c = worksheet[f"{matrix_h_start_letter}{matrix_v_start}"]
 worksheet.freeze_panes = c
 
-print(path)
+print(f"Saved to: {path}")
 wb.save(filename=path)

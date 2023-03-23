@@ -9,13 +9,13 @@ from openpyxl.worksheet.worksheet import Worksheet
 from time_iterate import TimeIteratorMode, TimeIterator
 
 mode = TimeIteratorMode.WEEKS
-name = "gantt"
-path = Path.home() / f'{name}_{mode.name.lower()}.xlsx'
+name = "gantt_week_template"
+path = Path.home() / 'Documents' / f'{name}_{mode.name.lower()}.xlsx'
 # path = 'custom/path'
 
-start_year = 2022
-start_month = 8
-months_duration = 13
+start_year = 2023
+start_month = 1
+months_duration = 24
 
 timeIterate = TimeIterator(start_year, start_month, months_duration, mode)
 
