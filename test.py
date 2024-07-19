@@ -1,15 +1,17 @@
 import datetime
 
-from time_iterate import TimeIterator, TimeIteratorMode
+
 import calendar
 
-start_year = 2022
-start_month = 10
-months_duration = 4
+from generator.time_iterator import TimeIterator, TimeIteratorMode
+
+start_year = 2024
+start_month = 1
+months_duration = 24
 
 # t = TimeIterator(start_year, start_month, months_duration, mode=TimeIteratorMode.MONTHS)
-# t = TimeIterator(start_year, start_month, months_duration, mode=TimeIteratorMode.WEEKS)
-t = TimeIterator(start_year, start_month, months_duration, mode=TimeIteratorMode.DAYS)
+t = TimeIterator(start_year, start_month, months_duration, mode=TimeIteratorMode.WEEKS)
+# t = TimeIterator(start_year, start_month, months_duration, mode=TimeIteratorMode.DAYS)
 # t = TimeIterator(start_year, start_month, months_duration, mode=TimeIteratorMode.DAYS_NO_WEEKEND)
 
 print(t)
