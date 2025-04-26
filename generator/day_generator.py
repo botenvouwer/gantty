@@ -7,7 +7,7 @@ from openpyxl.styles import Font, Border, Side, Alignment, NamedStyle, PatternFi
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from time_iterator import TimeIteratorMode, TimeIterator
+from generator.time_iterator import TimeIteratorMode, TimeIterator
 
 
 def generate_day_gannt(months_duration, start_year=None, start_month=None, path=None, workdays_only=True):

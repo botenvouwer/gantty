@@ -99,7 +99,11 @@ class TimeIterator:
 
                     if ii % 7 == 1:
                         i += 1
-                        yield passed_months, year, days_left_in_year, month, month_name, days_in_month, i, week_number
+
+                        if week_number == 1 and i > 1:
+                            yield passed_months + 1, year, self.days_left_in_year(year + 1, 1), 1, self.get_month_name(1), self.days_in_month(year + 1, month), i, week_number
+                        else:
+                            yield passed_months, year, days_left_in_year, month, month_name, days_in_month, i, week_number
 
                     continue
 
@@ -115,17 +119,13 @@ class TimeIterator:
                     yield passed_months, year, days_left_in_year, month, month_name, days_in_month, i, week_number, day_number, day, day_name
 
     def get_weeks_in_month(self, year, month):
+        month_matrix = self.calendar.monthdayscalendar(year, month)
+        return len(month_matrix)
 
-        i = 0
-        iter_t = self.calendar.itermonthdays(year, month)
-        for day_number in iter_t:
-            if day_number == 0:
-                next(islice(iter_t, 5, 6), None)
-
-            if day_number % 7 == 1:
-                i += 1
-
-        return i
+    @staticmethod
+    def get_number_of_weeks_for_year(year):
+        last_week = datetime.date(year, 12, 28)
+        return last_week.isocalendar().week
 
     def __len__(self):
         return sum(1 for _ in self.iterate_full())
