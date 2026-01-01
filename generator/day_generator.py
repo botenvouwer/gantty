@@ -10,11 +10,10 @@ from openpyxl.worksheet.worksheet import Worksheet
 from generator.time_iterator import TimeIteratorMode, TimeIterator
 
 
-def generate_day_gannt(months_duration, start_year=None, start_month=None, path=None, workdays_only=True):
+def generate_day_gannt(months_duration, start_year=None, start_month=None, path=None, workdays_only=True, name='gantt_day_template'):
     start_year = start_year or datetime.datetime.now().year
     start_month = start_month or datetime.datetime.now().month
     mode = TimeIteratorMode.DAYS_NO_WEEKEND if workdays_only else TimeIteratorMode.DAYS
-    name = f"gantt_{mode.name.lower()}_template"
     path = path or (Path.home() / 'Documents' / (name + '.xlsx'))
 
     time_iterate = TimeIterator(start_year, start_month, months_duration, mode)
